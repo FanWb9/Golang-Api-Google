@@ -1,0 +1,26 @@
+# Ignore environment files
+.env
+*.env
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.out
+*.a
+
+# Compiled object files
+*.o
+*.obj
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Dependency directories
+/vendor/
+node_modules/
