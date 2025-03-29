@@ -30,6 +30,11 @@ func Register(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 		return
 	}
+	//This Check is to register if user has alredy resgister via the email same
+	if err := config.DB.Where("email = ?",user.Email).First(&EmailCheck).Error; err == nil{
+		c.JSON(http.StatusBadRequest,gin.H{"message":"Email alredy exist"})
+		return
+	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password),10)
 	user.Password = string(hashedPassword)
 
@@ -39,11 +44,7 @@ func Register(c *gin.Context){
 		return
 	}
 	
-	//This Check is to register if user has alredy resgister via the email same
-	if err := config.DB.Where("email = ?",user.Email).First(&EmailCheck).Error; err == nil{
-		c.JSON(http.StatusBadRequest,gin.H{"message":"Email alredy exist"})
-		return
-	}
+	
 	c.JSON(http.StatusOK,gin.H{"message":"user register success"})
 
 }
