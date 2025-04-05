@@ -1,15 +1,20 @@
 package config
 
-import(
-	"gorm.io/gorm"
-	"gorm.io/driver/mysql"
+import (
 	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var DB * gorm.DB
 
 func Connect(){
-	dsn := "root:@tcp(127.0.0.1:3306)/catalog_db?charset=utf8mb4&parseTime=True&loc=Local"
+	_ = godotenv.Load()
+
+	dsn := os.Getenv("DB")
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil{
