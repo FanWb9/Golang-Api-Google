@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -25,25 +26,41 @@ var googleAuthConfig = &oauth2.Config{
 
 func Register(c *gin.Context){
 	var user models.User
-	var EmailCheck models.User
+	var CheckedVald models.User
 	if err := c.ShouldBindJSON(&user); err != nil{
 		c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 		return
 	}
-	//This Check is to register if user has alredy resgister via the email same
-	if err := config.DB.Where("email = ?",user.Email).First(&EmailCheck).Error; err == nil{
-		c.JSON(http.StatusBadRequest,gin.H{"message":"Email alredy exist"})
+	//This Check is to register if user has alredy resgister via the email  and phoneNumber same
+	if err := config.DB.Where("email = ? or phone_number = ?",user.Email, user.PhoneNumber).First(&CheckedVald).Error; err == nil{
+		if CheckedVald.Email == user.Email{
+			c.JSON(http.StatusBadRequest,gin.H{"message":"email alredy exist"})
+		}else{
+			c.JSON(http.StatusBadRequest,gin.H{"message":"phone number alredy exist"})
+		}
 		return
 	}
+	//this generate password to hash
+	//and store it in the database
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password),10)
 	user.Password = string(hashedPassword)
+
+	//this convert date of birth to time.Time with the format(yyyy-mm-dd)
+	//and store it in the database
+	//this is the format of date of birth example 2006-01-02
+	Layout := "2006-01-02" 
+	parsedDate , err := time.Parse(Layout, user.DateBirtStr)
+	if err != nil{
+		c.JSON(http.StatusBadRequest,gin.H{"message":"invalid date format"})
+		return
+	}
+	user.DateOfBirth = &parsedDate
 
 	//Create account for NewMember
 	if err := config.DB.Create(&user).Error; err != nil{
 		c.JSON(http.StatusInternalServerError,gin.H{"message":"failed to register user"})
 		return
 	}
-	
 	
 	c.JSON(http.StatusOK,gin.H{"message":"user register success"})
 
