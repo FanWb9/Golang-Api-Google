@@ -26,7 +26,7 @@ var googleAuthConfig = &oauth2.Config{
 
 func Register(c *gin.Context){
 	var user models.User
-	var CheckedVald models.User
+	var CheckedVald models.User //this is to check if the user has already registered
 	if err := c.ShouldBindJSON(&user); err != nil{
 		c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 		return
